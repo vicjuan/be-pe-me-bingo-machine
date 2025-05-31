@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>注音 Bingo 遊戲</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      font-size: 1.5em;
+    }
+    #current {
+      font-size: 24em;
+    }
+    #remaining {
+      margin-top: 1em;
+      font-size: 1.2em;
+      color: #666;
+    }
+    button {
+      font-size: 4.5em;
+      padding: 1.5em 3em;
+    }
+    #drawnSymbols {
+      font-size: 2em;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>注音符號 Bingo 遊戲</h1>
+  <div id="current">--</div>
+  <button id="drawButton">抽出注音</button>
+  <div id="remaining">剩餘符號：37 個</div>
+  <div id="drawnSymbols"></div>
+
+  <script>
+    const zhuyinSymbols = [
+      'ㄅ', 'ㄆ', 'ㄇ', 'ㄈ',
+      'ㄉ', 'ㄊ', 'ㄋ', 'ㄌ',
+      'ㄍ', 'ㄎ', 'ㄏ',
+      'ㄐ', 'ㄑ', 'ㄒ',
+      'ㄓ', 'ㄔ', 'ㄕ', 'ㄖ',
+      'ㄗ', 'ㄘ', 'ㄙ',
+      'ㄧ', 'ㄨ', 'ㄩ',
+      'ㄚ', 'ㄛ', 'ㄜ', 'ㄝ',
+      'ㄞ', 'ㄟ', 'ㄠ', 'ㄡ',
+      'ㄢ', 'ㄣ', 'ㄤ', 'ㄥ',
+      'ㄦ'
+    ];
+
+    let pool = [...zhuyinSymbols];
+
+    const currentDiv = document.getElementById('current');
+    const drawButton = document.getElementById('drawButton');
+    const remainingDiv = document.getElementById('remaining');
+    const drawnSymbolsDiv = document.getElementById('drawnSymbols');
+
+    drawButton.addEventListener('click', () => {
+      if (pool.length === 0) {
+        currentDiv.textContent = '結束';
+        drawButton.disabled = true;
+        return;
+      }
+
+      const index = Math.floor(Math.random() * pool.length);
+      const symbol = pool.splice(index, 1)[0];  // 移除並取得符號
+      currentDiv.textContent = symbol;
+      drawnSymbolsDiv.textContent += symbol + ' ';
+      remainingDiv.textContent = `剩餘符號：${pool.length} 個`;
+    });
+  </script>
+</body>
+</html>
