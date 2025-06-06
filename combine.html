@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>結合韻 Bingo 遊戲</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      font-size: 1.5em;
+    }
+    #current {
+      font-size: 18em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 2.5em;
+    }
+    .symbol {
+      line-height: 1;
+    }
+    #remaining {
+      margin-top: 1em;
+      font-size: 1.2em;
+      color: #666;
+    }
+    button {
+      font-size: 4.5em;
+      padding: 1.5em 3em;
+    }
+    #drawnSymbols {
+      font-size: 2em;
+      margin-top: 1em;
+    }
+    h1 {
+      display: inline-block;
+      margin-right: 0.5em;
+    }
+    .game-link {
+      font-size: 1em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <h1>結合韻 Bingo 遊戲</h1><a href="index.html" class="game-link">注音符號 Bingo 遊戲</a>
+  <div id="current"><div class="symbol">-</div><div class="symbol">-</div></div>
+  <button id="drawButton">抽出結合韻</button>
+  <div id="remaining">剩餘符號：22 個</div>
+  <div id="drawnSymbols"></div>
+
+  <script>
+    const combinedRhymes = [
+      'ㄧㄚ', 'ㄧㄛ', 'ㄧㄝ','ㄧㄞ',
+      'ㄧㄠ', 'ㄧㄡ', 'ㄧㄢ', 'ㄧㄣ',
+      'ㄧㄤ', 'ㄧㄥ',
+      'ㄨㄚ', 'ㄨㄛ', 'ㄨㄞ', 'ㄨㄟ',
+      'ㄨㄢ', 'ㄨㄣ', 'ㄨㄤ', 'ㄨㄥ',
+      'ㄩㄝ', 'ㄩㄢ', 'ㄩㄣ', 'ㄩㄥ'
+    ];
+
+    let pool = [...combinedRhymes];
+
+    const currentDiv = document.getElementById('current');
+    const drawButton = document.getElementById('drawButton');
+    const remainingDiv = document.getElementById('remaining');
+    const drawnSymbolsDiv = document.getElementById('drawnSymbols');
+
+    drawButton.addEventListener('click', () => {
+      if (pool.length === 0) {
+        currentDiv.innerHTML = '<div class="symbol">結</div><div class="symbol">束</div>';
+        drawButton.disabled = true;
+        return;
+      }
+
+      const index = Math.floor(Math.random() * pool.length);
+      const symbol = pool.splice(index, 1)[0];  // 移除並取得符號
+      
+      // 分割結合韻為兩個字符並垂直顯示
+      const firstSymbol = symbol.charAt(0);
+      const secondSymbol = symbol.charAt(1);
+      currentDiv.innerHTML = `<div class="symbol">${firstSymbol}</div><div class="symbol">${secondSymbol}</div>`;
+      
+      // 用逗點隔開已抽出的符號
+      if (drawnSymbolsDiv.textContent.trim() === '') {
+        drawnSymbolsDiv.textContent = symbol;
+      } else {
+        drawnSymbolsDiv.textContent += ', ' + symbol;
+      }
+      
+      remainingDiv.textContent = `剩餘符號：${pool.length} 個`;
+    });
+  </script>
+</body>
+</html> 
