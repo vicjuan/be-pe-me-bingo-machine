@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>注音 Bingo 遊戲</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #fdfaf3;
+      padding: 1em;
+    }
+
+    h1 {
+      color: #aa5500;
+    }
+
+    #bingoGrid {
+      display: grid;
+      grid-template-columns: repeat(6, 60px);
+      grid-template-rows: repeat(6, 60px);
+      gap: 6px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+
+    .cell {
+      background-color: #fff9d1;
+      border: 2px solid #aaa;
+      font-size: 1.8em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s;
+    }
+
+    .cell.selected {
+      background-color: #f2b84b;
+      color: white;
+    }
+
+    .cell.completed {
+      border: 3px solid red;
+    }
+
+    #timer {
+      font-size: 0.9em;
+      color: #888;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>注音符號 Bingo</h1>
+  <div id="timer">時間：00:00</div>
+  <div id="bingoGrid"></div>
+
+  <script>
+    const zhuyinSymbols = [
+      'ㄅ','ㄆ','ㄇ','ㄈ','ㄉ','ㄊ','ㄋ','ㄌ',
+      'ㄍ','ㄎ','ㄏ','ㄐ','ㄑ','ㄒ','ㄓ','ㄔ',
+      'ㄕ','ㄖ','ㄗ','ㄘ','ㄙ','ㄧ','ㄨ','ㄩ',
+      'ㄚ','ㄛ','ㄜ','ㄝ','ㄞ','ㄟ','ㄠ','ㄡ',
+      'ㄢ','ㄣ','ㄤ','ㄥ','ㄦ'
+    ];
+
+    const gridSize = 6;
+    const bingoGrid = document.getElementById('bingoGrid');
+
+    // 隨機選出 36 個不重複的注音
+    const shuffled = zhuyinSymbols.sort(() => Math.random() - 0.5);
+    const selectedSymbols = shuffled.slice(0, gridSize * gridSize);
+
+    const cells = [];
+
+    for (let i = 0; i < gridSize * gridSize; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.textContent = selectedSymbols[i];
+      cell.dataset.index = i;
+      cell.addEventListener('click', () => {
+        cell.classList.toggle('selected');
+        checkLines();
+      });
+      bingoGrid.appendChild(cell);
+      cells.push(cell);
+    }
+
+    function checkLines() {
+      const completedIndexes = [];
+
+      // 檢查每一行
+      for (let row = 0; row < gridSize; row++) {
+        const start = row * gridSize;
+        const line = cells.slice(start, start + gridSize);
+        if (line.every(c => c.classList.contains('selected'))) {
+          line.forEach(c => c.classList.add('completed'));
+        }
+      }
+
+      // 檢查每一列
+      for (let col = 0; col < gridSize; col++) {
+        const line = [];
+        for (let row = 0; row < gridSize; row++) {
+          line.push(cells[row * gridSize + col]);
+        }
+        if (line.every(c => c.classList.contains('selected'))) {
+          line.forEach(c => c.classList.add('completed'));
+        }
+      }
+
+      // 檢查對角線（左上到右下）
+      const diag1 = [];
+      for (let i = 0; i < gridSize; i++) {
+        diag1.push(cells[i * gridSize + i]);
+      }
+      if (diag1.every(c => c.classList.contains('selected'))) {
+        diag1.forEach(c => c.classList.add('completed'));
+      }
+
+      // 檢查對角線（右上到左下）
+      const diag2 = [];
+      for (let i = 0; i < gridSize; i++) {
+        diag2.push(cells[i * gridSize + (gridSize - i - 1)]);
+      }
+      if (diag2.every(c => c.classList.contains('selected'))) {
+        diag2.forEach(c => c.classList.add('completed'));
+      }
+    }
+
+    // 🔸 碼錶功能
+    let seconds = 0;
+    const timerEl = document.getElementById('timer');
+    setInterval(() => {
+      seconds++;
+      const min = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const sec = String(seconds % 60).padStart(2, '0');
+      timerEl.textContent = `時間：${min}:${sec}`;
+    }, 1000);
+  </script>
+</body>
+</html>
