@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>注音配對遊戲</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f7f1;
+      text-align: center;
+      padding: 2em;
+    }
+
+    h1 {
+      color: #8a4f00;
+    }
+
+    #gameBoard {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 500px;
+      margin: 2em auto;
+      gap: 10px;
+    }
+
+    .card {
+      width: 100px;
+      height: 100px;
+      background: #fff6d5;
+      border: 2px solid #ccc;
+      font-size: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s;
+    }
+
+    .card.revealed {
+      background: #f2b84b;
+      color: white;
+    }
+
+    .card.matched {
+      background: #8cd790;
+      border-color: #4caf50;
+      color: white;
+      cursor: default;
+    }
+
+    #message {
+      margin-top: 1.5em;
+      font-size: 1.2em;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <h1>注音配對遊戲</h1>
+  <div id="gameBoard"></div>
+  <div id="message"></div>
+
+  <script>
+    const data = [
+      { word: "紅", zhuyin: "ㄏㄨㄥˊ" },
+      { word: "橙", zhuyin: "ㄔㄥˊ" },
+      { word: "黃", zhuyin: "ㄏㄨㄤˊ" },
+      { word: "綠", zhuyin: "ㄌㄩˋ" },
+      { word: "藍", zhuyin: "ㄌㄢˊ" },
+      { word: "靛", zhuyin: "ㄉㄧㄢˋ" },
+      { word: "白", zhuyin: "ㄅㄞˊ" },
+      { word: "黑", zhuyin: "ㄏㄟ" }
+    ];
+
+    const board = document.getElementById("gameBoard");
+    const message = document.getElementById("message");
+
+    // 拆解注音為 聲符 + 其他部分
+    function splitZhuyin(zhuyin) {
+      return [zhuyin[0], zhuyin.slice(1)];
+    }
+
+    let cards = [];
+
+    data.forEach((item, index) => {
+      const [initial, rest] = splitZhuyin(item.zhuyin);
+      cards.push({ text: initial, matchId: index });
+      cards.push({ text: rest, matchId: index });
+    });
+
+    // 打亂順序
+    cards = cards.sort(() => Math.random() - 0.5);
+
+    // 建立 DOM 卡片
+    let revealed = [];
+    let matchedCount = 0;
+
+    cards.forEach((card, i) => {
+      const div = document.createElement("div");
+      div.className = "card";
+      div.textContent = "";
+      div.dataset.index = i;
+      board.appendChild(div);
+    });
+
+    function revealCard(index) {
+      const cardDiv = board.children[index];
+      const card = cards[index];
+
+      if (cardDiv.classList.contains("matched") || cardDiv.classList.contains("revealed")) return;
+      cardDiv.classList.add("revealed");
+      cardDiv.textContent = card.text;
+      revealed.push({ index, matchId: card.matchId });
+
+      if (revealed.length === 2) {
+        const [first, second] = revealed;
+
+        if (first.matchId === second.matchId && first.index !== second.index) {
+          // 配對成功
+          setTimeout(() => {
+            board.children[first.index].classList.add("matched");
+            board.children[second.index].classList.add("matched");
+            revealed = [];
+            matchedCount++;
+            if (matchedCount === data.length) {
+              message.textContent = "🎉 你完成了全部配對！";
+            }
+          }, 300);
+        } else {
+          // 配對錯誤
+          setTimeout(() => {
+            board.children[first.index].classList.remove("revealed");
+            board.children[second.index].classList.remove("revealed");
+            board.children[first.index].textContent = "";
+            board.children[second.index].textContent = "";
+            revealed = [];
+          }, 700);
+        }
+      }
+    }
+
+    // 加入事件監聽
+    board.querySelectorAll(".card").forEach((cardEl, index) => {
+      cardEl.addEventListener("click", () => {
+        if (revealed.length < 2) {
+          revealCard(index);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
