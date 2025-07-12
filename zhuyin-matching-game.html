@@ -44,11 +44,19 @@
     }
 
     .card.matched {
-      background: #8cd790;
-      border-color: #4caf50;
-      color: white;
+      border-color: #333;
       cursor: default;
     }
+
+    /* 配對成功後的顏色 */
+    .card.matched.color-0 { background: #ff0000; color: white; } /* 紅 */
+    .card.matched.color-1 { background: #ffa500; color: white; } /* 橙 */
+    .card.matched.color-2 { background: #ffff00; color: black; } /* 黃 */
+    .card.matched.color-3 { background: #008000; color: white; } /* 綠 */
+    .card.matched.color-4 { background: #0000ff; color: white; } /* 藍 */
+    .card.matched.color-5 { background: #4b0082; color: white; } /* 靛 */
+    .card.matched.color-6 { background: #ffffff; color: black; border-color: #333; } /* 白 */
+    .card.matched.color-7 { background: #000000; color: white; } /* 黑 */
 
     #message {
       margin-top: 1.5em;
@@ -122,6 +130,8 @@
           setTimeout(() => {
             board.children[first.index].classList.add("matched");
             board.children[second.index].classList.add("matched");
+            board.children[first.index].classList.add(`color-${first.matchId}`);
+            board.children[second.index].classList.add(`color-${second.matchId}`);
             revealed = [];
             matchedCount++;
             if (matchedCount === data.length) {
