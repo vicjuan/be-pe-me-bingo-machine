@@ -44,11 +44,20 @@
     }
 
     .card.matched {
-      background: #8cd790;
-      border-color: #4caf50;
+      border-color: #333;
       color: white;
       cursor: default;
     }
+
+    /* 對應的顏色樣式 */
+    .card.matched.color-red { background: #ff0000; }
+    .card.matched.color-orange { background: #ff8c00; }
+    .card.matched.color-yellow { background: #ffff00; color: #333; }
+    .card.matched.color-green { background: #008000; }
+    .card.matched.color-blue { background: #0000ff; }
+    .card.matched.color-indigo { background: #4b0082; }
+    .card.matched.color-white { background: #ffffff; color: #333; border-color: #ccc; }
+    .card.matched.color-black { background: #000000; }
 
     #message {
       margin-top: 1.5em;
@@ -72,6 +81,17 @@
       { word: "靛", zhuyin: "ㄉㄧㄢˋ" },
       { word: "白", zhuyin: "ㄅㄞˊ" },
       { word: "黑", zhuyin: "ㄏㄟ" }
+    ];
+
+    const colorClasses = [
+      "color-red",
+      "color-orange", 
+      "color-yellow",
+      "color-green",
+      "color-blue",
+      "color-indigo",
+      "color-white",
+      "color-black"
     ];
 
     const board = document.getElementById("gameBoard");
@@ -120,8 +140,9 @@
         if (first.matchId === second.matchId && first.index !== second.index) {
           // 配對成功
           setTimeout(() => {
-            board.children[first.index].classList.add("matched");
-            board.children[second.index].classList.add("matched");
+            const colorClass = colorClasses[first.matchId];
+            board.children[first.index].classList.add("matched", colorClass);
+            board.children[second.index].classList.add("matched", colorClass);
             revealed = [];
             matchedCount++;
             if (matchedCount === data.length) {
