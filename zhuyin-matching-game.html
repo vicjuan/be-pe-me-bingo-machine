@@ -63,6 +63,55 @@
       border-color: #e74c3c;
     }
 
+    /* 各顏色的CSS類別 */
+    .card.color-red {
+      background: #ff0000;
+      border-color: #cc0000;
+      color: white;
+    }
+
+    .card.color-orange {
+      background: #ff8000;
+      border-color: #cc6600;
+      color: white;
+    }
+
+    .card.color-yellow {
+      background: #ffff00;
+      border-color: #cccc00;
+      color: black;
+    }
+
+    .card.color-green {
+      background: #00ff00;
+      border-color: #00cc00;
+      color: black;
+    }
+
+    .card.color-blue {
+      background: #0000ff;
+      border-color: #0000cc;
+      color: white;
+    }
+
+    .card.color-indigo {
+      background: #4b0082;
+      border-color: #380062;
+      color: white;
+    }
+
+    .card.color-black {
+      background: #000000;
+      border-color: #333333;
+      color: white;
+    }
+
+    .card.color-white {
+      background: #ffffff;
+      border-color: #cccccc;
+      color: black;
+    }
+
     #message {
       margin-top: 1.5em;
       font-size: 1.2em;
@@ -84,14 +133,14 @@
 
   <script>
     const data = [
-      { word: "紅", zhuyin: "ㄏㄨㄥˊ" },
-      { word: "橙", zhuyin: "ㄔㄥˊ" },
-      { word: "黃", zhuyin: "ㄏㄨㄤˊ" },
-      { word: "綠", zhuyin: "ㄌㄩˋ" },
-      { word: "藍", zhuyin: "ㄌㄢˊ" },
-      { word: "靛", zhuyin: "ㄉㄧㄢˋ" },
-      { word: "白", zhuyin: "ㄅㄞˊ" },
-      { word: "黑", zhuyin: "ㄏㄟ" }
+      { word: "紅", zhuyin: "ㄏㄨㄥˊ", color: "red" },
+      { word: "橙", zhuyin: "ㄔㄥˊ", color: "orange" },
+      { word: "黃", zhuyin: "ㄏㄨㄤˊ", color: "yellow" },
+      { word: "綠", zhuyin: "ㄌㄩˋ", color: "green" },
+      { word: "藍", zhuyin: "ㄌㄢˊ", color: "blue" },
+      { word: "靛", zhuyin: "ㄉㄧㄢˋ", color: "indigo" },
+      { word: "白", zhuyin: "ㄅㄞˊ", color: "white" },
+      { word: "黑", zhuyin: "ㄏㄟ", color: "black" }
     ];
 
     const board = document.getElementById("gameBoard");
@@ -106,8 +155,8 @@
 
     data.forEach((item, index) => {
       const [initial, rest] = splitZhuyin(item.zhuyin);
-      cards.push({ text: initial, matchId: index, type: 'initial', word: item.word });
-      cards.push({ text: rest, matchId: index, type: 'final', word: item.word });
+      cards.push({ text: initial, matchId: index, color: item.color });
+      cards.push({ text: rest, matchId: index, color: item.color });
     });
 
     // 打亂順序
@@ -130,51 +179,38 @@
       const cardDiv = board.children[index];
       const card = cards[index];
 
-      if (cardDiv.classList.contains("matched")) return;
+      if (cardDiv.classList.contains("matched") || cardDiv.classList.contains("revealed")) return;
+      cardDiv.classList.add("revealed");
+      cardDiv.textContent = card.text;
+      revealed.push({ index, matchId: card.matchId, color: card.color });
 
-      // 如果沒有選中的卡片
-      if (!selectedCard) {
-        selectedCard = { index, card };
-        cardDiv.classList.add("selected");
-        return;
-      }
+      if (revealed.length === 2) {
+        const [first, second] = revealed;
 
-      // 如果點擊同一張卡片，取消選擇
-      if (selectedCard.index === index) {
-        cardDiv.classList.remove("selected");
-        selectedCard = null;
-        return;
-      }
-
-      // 檢查配對
-      const firstCard = selectedCard.card;
-      const secondCard = card;
-
-      if (firstCard.matchId === secondCard.matchId && firstCard.type !== secondCard.type) {
-        // 配對成功
-        setTimeout(() => {
-          board.children[selectedCard.index].classList.add("matched");
-          board.children[selectedCard.index].classList.remove("selected");
-          cardDiv.classList.add("matched");
-          selectedCard = null;
-          matchedCount++;
-          
-          message.textContent = `✅ 配對成功！${firstCard.word}: ${firstCard.type === 'initial' ? firstCard.text + secondCard.text : secondCard.text + firstCard.text}`;
-          
-          if (matchedCount === data.length) {
-            setTimeout(() => {
-              message.textContent = "🎉 恭喜你完成了全部配對！";
-            }, 1000);
-          }
-        }, 300);
-      } else {
-        // 配對錯誤
-        message.textContent = "❌ 配對錯誤，請重新嘗試！";
-        setTimeout(() => {
-          board.children[selectedCard.index].classList.remove("selected");
-          selectedCard = null;
-          message.textContent = "";
-        }, 1000);
+        if (first.matchId === second.matchId && first.index !== second.index) {
+          // 配對成功
+          setTimeout(() => {
+            // 移除 revealed 類別，添加對應顏色的類別
+            board.children[first.index].classList.remove("revealed");
+            board.children[second.index].classList.remove("revealed");
+            board.children[first.index].classList.add("matched", `color-${first.color}`);
+            board.children[second.index].classList.add("matched", `color-${second.color}`);
+            revealed = [];
+            matchedCount++;
+            if (matchedCount === data.length) {
+              message.textContent = "🎉 你完成了全部配對！";
+            }
+          }, 300);
+        } else {
+          // 配對錯誤
+          setTimeout(() => {
+            board.children[first.index].classList.remove("revealed");
+            board.children[second.index].classList.remove("revealed");
+            board.children[first.index].textContent = "";
+            board.children[second.index].textContent = "";
+            revealed = [];
+          }, 700);
+        }
       }
     }
 
