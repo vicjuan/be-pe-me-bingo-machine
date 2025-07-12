@@ -98,6 +98,18 @@
       color: white;
     }
 
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-8px); }
+      80% { transform: translateX(8px); }
+      100% { transform: translateX(0); }
+    }
+    .card.shake {
+      animation: shake 0.4s;
+    }
+
     #message {
       margin-top: 1.5em;
       font-size: 1.2em;
@@ -206,11 +218,16 @@
       } else {
         // 配對錯誤
         message.textContent = "❌ 配對錯誤，請重新嘗試！";
+        const firstDiv = board.children[selectedCard.index];
+        cardDiv.classList.add("shake");
+        firstDiv.classList.add("shake");
         setTimeout(() => {
+          cardDiv.classList.remove("shake");
+          firstDiv.classList.remove("shake");
           board.children[selectedCard.index].classList.remove("selected");
           selectedCard = null;
           message.textContent = "";
-        }, 1000);
+        }, 400);
       }
     }
 
