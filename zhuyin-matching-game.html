@@ -46,21 +46,64 @@
     }
 
     .card.matched {
-      background: #8cd790;
-      border-color: #4caf50;
-      color: white;
       cursor: default;
       transform: scale(1);
     }
 
-    .card.initial {
-      background: #e8f4f8;
-      border-color: #3498db;
+    /* 移除原有的initial和final不同顏色，統一使用淺灰色 */
+    .card.initial,
+    .card.final {
+      background: #f0f0f0;
+      border-color: #ccc;
     }
 
-    .card.final {
-      background: #fce8e6;
-      border-color: #e74c3c;
+    /* 為每個顏色詞語定義對應的配對成功顏色 */
+    .card.matched.color-red {
+      background: #ff4444;
+      border-color: #cc2222;
+      color: white;
+    }
+
+    .card.matched.color-orange {
+      background: #ff8800;
+      border-color: #cc6600;
+      color: white;
+    }
+
+    .card.matched.color-yellow {
+      background: #ffdd00;
+      border-color: #ccaa00;
+      color: black;
+    }
+
+    .card.matched.color-green {
+      background: #44cc44;
+      border-color: #228822;
+      color: white;
+    }
+
+    .card.matched.color-blue {
+      background: #4488ff;
+      border-color: #2266cc;
+      color: white;
+    }
+
+    .card.matched.color-indigo {
+      background: #6644aa;
+      border-color: #442288;
+      color: white;
+    }
+
+    .card.matched.color-white {
+      background: #ffffff;
+      border-color: #cccccc;
+      color: black;
+    }
+
+    .card.matched.color-black {
+      background: #333333;
+      border-color: #111111;
+      color: white;
     }
 
     #message {
@@ -84,14 +127,14 @@
 
   <script>
     const data = [
-      { word: "紅", zhuyin: "ㄏㄨㄥˊ" },
-      { word: "橙", zhuyin: "ㄔㄥˊ" },
-      { word: "黃", zhuyin: "ㄏㄨㄤˊ" },
-      { word: "綠", zhuyin: "ㄌㄩˋ" },
-      { word: "藍", zhuyin: "ㄌㄢˊ" },
-      { word: "靛", zhuyin: "ㄉㄧㄢˋ" },
-      { word: "白", zhuyin: "ㄅㄞˊ" },
-      { word: "黑", zhuyin: "ㄏㄟ" }
+      { word: "紅", zhuyin: "ㄏㄨㄥˊ", color: "red" },
+      { word: "橙", zhuyin: "ㄔㄥˊ", color: "orange" },
+      { word: "黃", zhuyin: "ㄏㄨㄤˊ", color: "yellow" },
+      { word: "綠", zhuyin: "ㄌㄩˋ", color: "green" },
+      { word: "藍", zhuyin: "ㄌㄢˊ", color: "blue" },
+      { word: "靛", zhuyin: "ㄉㄧㄢˋ", color: "indigo" },
+      { word: "白", zhuyin: "ㄅㄞˊ", color: "white" },
+      { word: "黑", zhuyin: "ㄏㄟ", color: "black" }
     ];
 
     const board = document.getElementById("gameBoard");
@@ -106,8 +149,8 @@
 
     data.forEach((item, index) => {
       const [initial, rest] = splitZhuyin(item.zhuyin);
-      cards.push({ text: initial, matchId: index, type: 'initial', word: item.word });
-      cards.push({ text: rest, matchId: index, type: 'final', word: item.word });
+      cards.push({ text: initial, matchId: index, type: 'initial', word: item.word, color: item.color });
+      cards.push({ text: rest, matchId: index, type: 'final', word: item.word, color: item.color });
     });
 
     // 打亂順序
@@ -153,9 +196,10 @@
       if (firstCard.matchId === secondCard.matchId && firstCard.type !== secondCard.type) {
         // 配對成功
         setTimeout(() => {
-          board.children[selectedCard.index].classList.add("matched");
+          const colorClass = `color-${firstCard.color}`;
+          board.children[selectedCard.index].classList.add("matched", colorClass);
           board.children[selectedCard.index].classList.remove("selected");
-          cardDiv.classList.add("matched");
+          cardDiv.classList.add("matched", colorClass);
           selectedCard = null;
           matchedCount++;
           
