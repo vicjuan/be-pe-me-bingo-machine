@@ -35,12 +35,14 @@
       justify-content: center;
       cursor: pointer;
       user-select: none;
-      transition: background 0.3s;
+      transition: all 0.3s;
     }
 
-    .card.revealed {
+    .card.selected {
       background: #f2b84b;
       color: white;
+      border-color: #e67e22;
+      transform: scale(1.05);
     }
 
     .card.matched {
@@ -48,6 +50,17 @@
       border-color: #4caf50;
       color: white;
       cursor: default;
+      transform: scale(1);
+    }
+
+    .card.initial {
+      background: #e8f4f8;
+      border-color: #3498db;
+    }
+
+    .card.final {
+      background: #fce8e6;
+      border-color: #e74c3c;
     }
 
     #message {
@@ -55,10 +68,17 @@
       font-size: 1.2em;
       color: #444;
     }
+
+    #instructions {
+      margin-bottom: 1em;
+      color: #666;
+      font-size: 1.1em;
+    }
   </style>
 </head>
 <body>
   <h1>注音配對遊戲</h1>
+  <div id="instructions">點擊聲符和韻符來配對完整的注音！</div>
   <div id="gameBoard"></div>
   <div id="message"></div>
 
@@ -86,69 +106,86 @@
 
     data.forEach((item, index) => {
       const [initial, rest] = splitZhuyin(item.zhuyin);
-      cards.push({ text: initial, matchId: index });
-      cards.push({ text: rest, matchId: index });
+      cards.push({ text: initial, matchId: index, type: 'initial', word: item.word });
+      cards.push({ text: rest, matchId: index, type: 'final', word: item.word });
     });
 
     // 打亂順序
     cards = cards.sort(() => Math.random() - 0.5);
 
     // 建立 DOM 卡片
-    let revealed = [];
+    let selectedCard = null;
     let matchedCount = 0;
 
     cards.forEach((card, i) => {
       const div = document.createElement("div");
-      div.className = "card";
-      div.textContent = "";
+      div.className = `card ${card.type}`;
+      div.textContent = card.text;
       div.dataset.index = i;
+      div.title = `${card.type === 'initial' ? '聲符' : '韻符'} - 對應字: ${card.word}`;
       board.appendChild(div);
     });
 
-    function revealCard(index) {
+    function selectCard(index) {
       const cardDiv = board.children[index];
       const card = cards[index];
 
-      if (cardDiv.classList.contains("matched") || cardDiv.classList.contains("revealed")) return;
-      cardDiv.classList.add("revealed");
-      cardDiv.textContent = card.text;
-      revealed.push({ index, matchId: card.matchId });
+      if (cardDiv.classList.contains("matched")) return;
 
-      if (revealed.length === 2) {
-        const [first, second] = revealed;
+      // 如果沒有選中的卡片
+      if (!selectedCard) {
+        selectedCard = { index, card };
+        cardDiv.classList.add("selected");
+        return;
+      }
 
-        if (first.matchId === second.matchId && first.index !== second.index) {
-          // 配對成功
-          setTimeout(() => {
-            board.children[first.index].classList.add("matched");
-            board.children[second.index].classList.add("matched");
-            revealed = [];
-            matchedCount++;
-            if (matchedCount === data.length) {
-              message.textContent = "🎉 你完成了全部配對！";
-            }
-          }, 300);
-        } else {
-          // 配對錯誤
-          setTimeout(() => {
-            board.children[first.index].classList.remove("revealed");
-            board.children[second.index].classList.remove("revealed");
-            board.children[first.index].textContent = "";
-            board.children[second.index].textContent = "";
-            revealed = [];
-          }, 700);
-        }
+      // 如果點擊同一張卡片，取消選擇
+      if (selectedCard.index === index) {
+        cardDiv.classList.remove("selected");
+        selectedCard = null;
+        return;
+      }
+
+      // 檢查配對
+      const firstCard = selectedCard.card;
+      const secondCard = card;
+
+      if (firstCard.matchId === secondCard.matchId && firstCard.type !== secondCard.type) {
+        // 配對成功
+        setTimeout(() => {
+          board.children[selectedCard.index].classList.add("matched");
+          board.children[selectedCard.index].classList.remove("selected");
+          cardDiv.classList.add("matched");
+          selectedCard = null;
+          matchedCount++;
+          
+          message.textContent = `✅ 配對成功！${firstCard.word}: ${firstCard.type === 'initial' ? firstCard.text + secondCard.text : secondCard.text + firstCard.text}`;
+          
+          if (matchedCount === data.length) {
+            setTimeout(() => {
+              message.textContent = "🎉 恭喜你完成了全部配對！";
+            }, 1000);
+          }
+        }, 300);
+      } else {
+        // 配對錯誤
+        message.textContent = "❌ 配對錯誤，請重新嘗試！";
+        setTimeout(() => {
+          board.children[selectedCard.index].classList.remove("selected");
+          selectedCard = null;
+          message.textContent = "";
+        }, 1000);
       }
     }
 
     // 加入事件監聽
     board.querySelectorAll(".card").forEach((cardEl, index) => {
       cardEl.addEventListener("click", () => {
-        if (revealed.length < 2) {
-          revealCard(index);
-        }
+        selectCard(index);
       });
     });
+
+    message.textContent = "開始配對吧！選擇一個聲符和對應的韻符。";
   </script>
 </body>
 </html>
